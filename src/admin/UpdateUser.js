@@ -7,26 +7,30 @@ import Footer from "../parts/Footer";
 const EditUser = () => {
   let navigate = useNavigate();
   const { id } = useParams();
-  const [userData, setUserData] = useState([]);
+  const [name, setName] = useState(`Loading...`);
+  const [username, setUsername] = useState(`Loading...`);
+  const [email, setEmail] = useState(`Loading...`);
+  const [phone, setPhone] = useState(`Loading...`);
+  const [address, setAddress] = useState(`Loading...`);
+  const [password, setPassword] = useState(`Loading...`);
 
   useEffect(() => {
     const loadUserList = async () => {
       try {
         const userList = await UserData(id);
-        setUserData(userList);
+
+        setName(`${userList[0].name}`);
+        setUsername(`${userList[0].username}`);
+        setEmail(`${userList[0].email}`);
+        setPhone(`${userList[0].number}`);
+        setAddress(`${userList[0].address}`);
+        setPassword(`${userList[0].password}`);
       } catch(error) {
         console.log(error.message)
       }
     }
     loadUserList();
   }, []);
-
-  const [name, setName] = useState(`${userData.length > 0 && userData[0].name}`);
-  const [username, setUsername] = useState(`${userData.length > 0 && userData[0].username}`);
-  const [email, setEmail] = useState(`${userData.length > 0 && userData[0].email}`);
-  const [phone, setPhone] = useState(`${userData.length > 0 && userData[0].number}`);
-  const [address, setAddress] = useState(`${userData.length > 0 && userData[0].address}`);
-  const [password, setPassword] = useState(`${userData.length > 0 && userData[0].password}`);
 
   const sendUser = async (e) => {
     e.preventDefault();

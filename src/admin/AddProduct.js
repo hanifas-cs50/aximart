@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { v4 } from 'uuid';
 import { ItemAdd, storage } from '../fetches/fetching';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import Footer from '../parts/Footer';
@@ -10,17 +11,18 @@ function AddProduct() {
   const [itemName, setItemName] = useState('');
   const [desc, setDesc] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('foods');
   const [imageUpload, setImageUpload] = useState(null);
 
   const sendItem = async (e) => {
     e.preventDefault();
     if (imageUpload == null) return;
     
-    let imageRef = ref(storage, `images/${imageUpload.name}`);
+    var imageName = imageUpload.name + v4();
+    let imageRef = ref(storage, `images/${imageName}`);
     uploadBytes(imageRef, imageUpload).then((snapshot) => {
         getDownloadURL(snapshot.ref).then((url) => {
-          ItemAdd(itemName, desc, price, category, url);
+          ItemAdd(itemName, desc, price, category, url, imageName);
         });
       });
 
@@ -51,7 +53,7 @@ function AddProduct() {
           </div>
           <div className='mb-4'>
             <label for='category' className='form-label fw-bold d-block'>Item Category</label>
-            <select className='form-select' value={category} onChange={(e) => setCategory(e.target.value)} style={{border: '2px solid #000'}}>
+            <select required className='form-select' value={category} onChange={(e) => setCategory(e.target.value)} style={{border: '2px solid #000'}}>
               <option value='foods'>Foods</option>
               <option value='beverages'>Beverages</option>
               <option value='others'>Others</option>
@@ -59,7 +61,7 @@ function AddProduct() {
           </div>
           <div>
             <label for='picture' className='d-flex form-label fw-bold'>Picture</label>
-            <input type='file' onChange={(event) => { setImageUpload(event.target.files[0]) }} id='picture' name='filename' />
+            <input required type='file' onChange={(event) => { setImageUpload(event.target.files[0]) }} id='picture' name='filename' />
             <div className='d-flex justify-content-end mt-4'>
               <button className='btn btn-primary float-left'>Add Product</button>
             </div>

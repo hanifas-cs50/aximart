@@ -61,7 +61,7 @@ function App() {
           </div>
         } />
 
-        <Route path='products/:name' element={
+        <Route path='products/:id' element={
           <div className="App">
             <Navbar />
             <Detail />
@@ -96,14 +96,14 @@ function App() {
             </div>
           </div>
         } />
-        {/* <Route path='admin/user/:id' element={
+        <Route path='admin/user/:id' element={
           <div className="App">
             <div className="row g-0">
               <SideBar />
               <EditUser />
             </div>
           </div>
-        } /> */}
+        } />
 
         <Route path='admin/addUser' element={
           <div className="App">
@@ -113,14 +113,14 @@ function App() {
             </div>
           </div>
         } />
-        {/* <Route path='admin/products/:id' element={
+        <Route path='admin/products/:id' element={
           <div className="App">
             <div className="row g-0">
               <SideBar />
               <EditProduct />
             </div>
           </div>
-        } /> */}
+        } />
 
       </Routes>
     </Router>

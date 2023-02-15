@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
-import { getStorage } from 'firebase/storage'
-import { collection, getDoc, getFirestore, getDocs, query, orderBy, doc, where, setDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { deleteObject, getStorage, ref } from 'firebase/storage'
+import { collection, getDoc, getFirestore, getDocs, query, doc, where, setDoc, deleteDoc, serverTimestamp, runTransaction } from 'firebase/firestore';
 
 const app = initializeApp({
   apiKey: 'AIzaSyBqegR8sj4De8TK2YLCAM3VWT2j-ilmvho',
@@ -15,46 +15,7 @@ const app = initializeApp({
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-async function ShopItemFetch(itemId) {
-  var itemFetches;
-
-  if (arguments.length === 0) {
-    itemFetches = getDocs(query(collection(db, 'shopItems'), orderBy('createdAt', 'desc')))
-      .then((snapshot) => {
-        let itemsData = [];
-        snapshot.docs.forEach((doc) => {
-          itemsData.push({ ...doc.data(), id: doc.id })
-        });
-        return itemsData;
-      })
-      .catch(err => {
-        console.log(err.message)
-      })
-  }
-  else {
-    itemFetches = [];
-    const itemSnap = await getDoc(doc(db, 'shopItems', itemId));
-
-    if (itemSnap.exists()) {
-      console.log(itemSnap.data())
-      itemFetches.push(itemSnap.data())
-    }
-    else {
-      alert('No such document!');
-    }
-  }
-
-  return itemFetches;
-}
-
-function AddToCart(item_name, item_price, item_quantity, userId) {
-  setDoc(doc(collection(db, 'usersCollection', userId, 'userCart')), {
-    p_name: item_name,
-    price: item_price,
-    quantity: item_quantity
-  })
-};
-
+// LOGIN START
 async function UserAuth(userName, passWord) {
   const auth = getDocs(query(collection(db, 'usersCollection'), where('username', '==', userName)))
     .then((snapshot) => {
@@ -82,7 +43,74 @@ async function UserAuth(userName, passWord) {
   // console.log(auth);
   return auth;
 }
+// LOGIN END
 
+// ITEM FETCH START
+async function ShopItemFetch(itemId) {
+  var itemFetches;
+
+  if (arguments.length === 0) {
+    itemFetches = getDocs(collection(db, 'shopItems'))
+      .then((snapshot) => {
+        let itemsData = [];
+        snapshot.docs.forEach((doc) => {
+          itemsData.push({ ...doc.data(), id: doc.id })
+        });
+        return itemsData;
+      })
+      .catch(err => {
+        console.log(err.message)
+      })
+  }
+  else {
+    itemFetches = [];
+    const itemSnap = await getDoc(doc(db, 'shopItems', itemId));
+
+    if (itemSnap.exists()) {
+      itemFetches.push(itemSnap.data())
+    }
+    else {
+      alert('No such document!');
+    }
+  }
+
+  return itemFetches;
+}
+
+function ItemAdd(itemName, dEsc, pRice, caTegory, imageURL, imageName) {
+  setDoc(doc(collection(db, 'shopItems')), {
+    item_nm: itemName,
+    item_desc: dEsc,
+    item_price: pRice,
+    item_pic: imageURL,
+    pic_name: imageName,
+    category: caTegory,
+    createdAt: serverTimestamp()
+  })
+}
+
+function ItemUpdate(itemId, itemName, dEsc, pRice, caTegory, imageURL, imageName) {
+  setDoc(doc(db, 'shopItems', itemId), {
+    item_nm: itemName,
+    item_desc: dEsc,
+    item_price: pRice,
+    item_pic: imageURL,
+    pic_name: imageName,
+    category: caTegory
+  })
+}
+
+function ItemDelete(itemId, pic_name) {
+  const imageRef = ref(storage, `images/${pic_name}`);
+  deleteObject(imageRef).catch((error) => {
+    console.log(error.message);
+  });
+
+  deleteDoc(doc(db, 'shopItems', itemId));
+}
+// ITEM FETCH END
+
+// USER COLLECTION START
 async function CartItems(userId) {
   const cart = getDocs(collection(db, 'usersCollection', userId, 'userCart'))
     .then((snapshot) => {
@@ -100,6 +128,61 @@ async function CartItems(userId) {
   return cart;
 }
 
+function CartItemAdd(item_name, item_price, item_quantity, userId) {
+  setDoc(doc(collection(db, 'usersCollection', userId, 'userCart')), {
+    p_name: item_name,
+    price: item_price,
+    quantity: item_quantity
+  })
+};
+
+function CartItemDelete(userId, cartItemId) {
+  deleteDoc(doc(db, 'usersCollection', userId, 'userCart', cartItemId));
+}
+
+async function OrderItems(userId, itemNames, itemCount, totalPrice) {
+  const userRef = doc(db, 'usersCollection', userId);
+
+  await runTransaction(db, async (transaction) => {
+    const snapshot = await transaction.get(userRef);
+    if (!snapshot.exists()) {
+      console.log('Document does not exist');
+    }
+
+    setDoc(doc(collection(db, 'usersCollection', userId, 'transaction')), {
+      name: snapshot.data().username,
+      email: snapshot.data().email,
+      number: snapshot.data().number,
+      address: snapshot.data().address,
+      itemNames: itemNames,
+      quantity: itemCount,
+      total: totalPrice,
+      createdAt: serverTimestamp()
+    });
+  });
+};
+// USER COLLECTION END
+
+
+async function TransFetch(userId) {
+  const trans = await getDocs(collection(db, 'shopItems', userId, 'transaction'))
+    .then((snapshot) => {
+      let transList = [];
+      snapshot.docs.forEach((doc) => {
+        transList.push({ ...doc.data(), id: doc.id })
+      });
+      return transList;
+    })
+    .catch(err => {
+      console.log(err.message)
+    });
+
+  // console.log(cart);
+  return trans;
+}
+
+
+// USER DATA START
 async function UserData(userId) {
   var userFetches;
 
@@ -178,30 +261,11 @@ function UserUpdate(userId, nAme, userName, eMail, phoneNum, addRess, passWord) 
     password: passWord
   })
 }
+// USER DATA END
 
-function ItemAdd(itemName, dEsc, pRice, caTegory, imageURL) {
-  setDoc(doc(collection(db, 'shopItems')), {
-    item_nm: itemName,
-    item_desc: dEsc,
-    item_price: pRice,
-    item_pic: imageURL,
-    category: caTegory,
-    createdAt: serverTimestamp()
-  })
-}
-
-function ItemUpdate(itemId, itemName, dEsc, pRice, caTegory, imageURL) {
-  setDoc(doc(db, 'shopItems', itemId), {
-    item_nm: itemName,
-    item_desc: dEsc,
-    item_price: pRice,
-    item_pic: imageURL,
-    category: caTegory
-  })
-}
-
-function ItemDelete(itemId) {
-  deleteDoc(doc(db, 'shopItems', itemId));
-}
-
-export { ShopItemFetch, UserAuth, CartItems, AddToCart, UserData, UserAdd, ItemAdd, UserDelete, ItemDelete, UserUpdate, ItemUpdate, storage };
+export {
+  UserAuth, ShopItemFetch, ItemAdd, ItemDelete, ItemUpdate,
+  CartItems, CartItemAdd, CartItemDelete, OrderItems,
+  TransFetch,
+  UserData, UserAdd, UserDelete, UserUpdate, storage
+};

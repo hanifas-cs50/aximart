@@ -34,11 +34,11 @@ const Login = () => {
       <form onSubmit={handleSubmit} className="bg-light p-5 rounded-4 shadow" style={{ width: "350px" }}>
         <div className="mb-4">
           <label for="username" className="form-label fw-bold">Username</label>
-          <input required value={username} onChange={(e) => setUsername(e.target.value)} type="text" className="w-100 input-css py-1" id="username" />
+          <input required value={username} onChange={(e) => setUsername(e.target.value)} type="text" className="w-100 py-1 px-2" id="username" />
         </div>
         <div>
           <label for="password" className="form-label fw-bold">Password</label>
-          <input required value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="mb-4 w-100 input-css py-1" id="password" />
+          <input required value={password} onChange={(e) => setPassword(e.target.value)} type="password" className="mb-4 w-100 py-1 px-2" id="password" />
           <div className="d-flex justify-content-end">
             <button className="btn btn-primary float-left">Login</button>
           </div>

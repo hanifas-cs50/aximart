@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { CartItems } from "../fetches/fetching";
+import { CartItemDelete, CartItems, OrderItems } from "../fetches/fetching";
 
 const Cart = () => {
   const userId = sessionStorage.getItem("id");
   const [cart, setCartList] = useState([]);
   var total = 0;
   var quantity = 0;
+  var itemNames = [];
 
   useEffect(() => {
     const loadCartList = async () => {
@@ -20,13 +21,17 @@ const Cart = () => {
     loadCartList();
   }, []);
 
-  // console.log(cart)
-
-  // if(cart.length == 0) {
-  //   setCartList([]);
-  // }
   if(cart.length > 0) {
-    cart.forEach(item => (total += (parseInt(item.price) * parseInt(item.quantity)), quantity += parseInt(item.quantity)));
+    cart.forEach(item => (total += (parseInt(item.price) * parseInt(item.quantity)), quantity += parseInt(item.quantity), itemNames.push(item.p_name)));
+  }
+
+  const deleteCartItem = (itemId) => {
+    CartItemDelete(userId, itemId);
+    window.location.reload();
+  }
+
+  const orderAll = () => {
+    OrderItems(userId, itemNames, quantity, total);
   }
 
   return (
@@ -47,18 +52,21 @@ const Cart = () => {
                 <th scope="col">Product Price</th>
                 <th scope="col">Quantity</th>
                 <th scope="col">Price</th>
+                <th scope="col">Action</th>
               </tr>
             </thead>
             <tbody>
-              {cart.map((item, index) => <CartRows key={item.id} prop={item} index={index + 1} />)}
+              {cart.map((item, index) => <CartRows key={item.id} prop={item} index={index + 1} delete={deleteCartItem}/>)}
               <tr>
                 <th colSpan={3}>Total: </th>
                 <td>{quantity}</td>
-                <td>{total}</td>
+                <td>Rp. {total}</td>
+                <td></td>
               </tr>
             </tbody>
-          </table> : undefined
+          </table> : <h5>You haven't ordered anything</h5>
         }
+        {cart.length > 0 ? <button className="btn btn-primary" onClick={orderAll()}>Buy All</button> : undefined}
         
       </section>
     </div>
@@ -66,16 +74,19 @@ const Cart = () => {
 }
 
 function CartRows(props) {
-  const { p_name, price, quantity } = props.prop;
+  const { p_name, price, quantity, id } = props.prop;
   const index = props.index;
 
   return (
     <tr>
       <th scope="row">{index}</th>
       <td>{p_name}</td>
-      <td>{price}</td>
+      <td>Rp. {price}</td>
       <td>{quantity}</td>
-      <td>{(price * quantity)}</td>
+      <td>Rp. {(price * quantity)}</td>
+      <td>
+        <button className="btn btn-danger" onClick={() => props.delete(id)}>Delete</button>
+      </td>
     </tr>
   )
 }

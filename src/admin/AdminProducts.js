@@ -13,6 +13,7 @@ const AdminProducts = () => {
       try {
         const itemList = await ShopItemFetch();
         setItemList(itemList);
+        // console.log(itemList);
       } catch (error) {
         console.log(error.message)
       }
@@ -21,15 +22,15 @@ const AdminProducts = () => {
     loadItemList();
   }, [])
 
-  const deleteItem = (id) => {
-    ItemDelete(id);
+  const deleteItem = (id, pic_name) => {
+    ItemDelete(id, pic_name);
   }
 
   return (
     <div className="col-10 container-fluid p-0 d-flex flex-column align-content-between">
       <Topbar />
 
-      <section className="container-sm table-responsive-xxl p-5 mt-5">
+      <section className="container-sm table-responsive-xxl p-5 mt-5" style={{ maxWidth: "900px" }}>
         <div className="d-flex justify-content-between mt-2">
           <h3 className="fw-bold">Products</h3>
           <Link className="btn btn-success align-content-center" to="/admin/addProduct">Add Product</Link>
@@ -57,7 +58,7 @@ const AdminProducts = () => {
 }
 
 function ItemRows(props) {
-  const { item_nm, item_price, category, id } = props.prop;
+  const { item_nm, item_price, category, id, pic_name } = props.prop;
   const index = props.index;
 
   return (
@@ -66,7 +67,7 @@ function ItemRows(props) {
       <td>{item_nm}</td>
       <td>{item_price}</td>
       <td>{category}</td>
-      <td><button className="btn btn-danger" onClick={() => props.delete(id)}>Delete</button></td>
+      <td><button className="btn btn-danger" onClick={() => props.delete(id, pic_name)}>Delete</button></td>
       <td><Link to={`/admin/products/${ id }`} className="btn btn-success">Update</Link></td>
     </tr>
   )

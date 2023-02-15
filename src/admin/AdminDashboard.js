@@ -29,7 +29,7 @@ const Dashboard = () => {
     <div className="col-10 container-fluid p-0 d-flex flex-column align-content-between">
       <Topbar />
 
-      <section className="container-sm table-responsive-xxl p-5 mt-5">
+      <section className="container-sm table-responsive-xxl p-5 mt-5" style={{ maxWidth: "900px" }}>
         <div className="d-flex justify-content-between mt-2">
           <h3 className="fw-bold">Users</h3>
           <Link className="btn btn-success align-content-center" to="/admin/addUser">Add User</Link>
@@ -70,6 +70,7 @@ function UserRows(props) {
       <td>{email}</td>
       <td><button className="btn btn-danger" onClick={() => props.delete(id)}>Delete</button></td>
       <td><Link to={`/admin/user/${ id }`} className="btn btn-success">Update</Link></td>
+      {/* <td><Link to={`/admin/user/${ id }`} className="btn btn-success">Update</Link></td> */}
     </tr>
   )
 }

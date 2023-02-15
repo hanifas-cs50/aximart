@@ -19,9 +19,9 @@ const Home = () => {
     loadItemList();
   }, [])
   
-  if(items.length>0) {
-    console.log(items);
-  }
+  // if(items.length>0) {
+  //   console.log(items);
+  // }
 
   return (
     <div id='home' className='container-fluid'>
